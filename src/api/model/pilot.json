@@ -1,0 +1,13 @@
+{
+  "name": "Zero Cool",
+  "status": true,
+  "score": 0,
+  "cash": 10000,
+  "location": "God Hangar",
+  "relationship_lazarus": 0,
+  "relationship_klamp": 0,
+  "relationship_police": 0,
+  "moths": {},
+  "buildings": {},
+  "disabled": true
+}
