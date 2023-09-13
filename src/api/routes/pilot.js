@@ -1,13 +1,15 @@
 const express = require('express');
-const pg_db = require("pg/lib/defaults");
-const mongo_db = require('../../../config/mongoDB');
 
 const router = express.Router();
-const Pilot = require('../model/pilot');
+
+const { moPilotModel, pgPilotModel } = require('../model/pilot');
+
+const models = [moPilotModel, pgPilotModel ];
 
 async function getPilots (req, res, next) {
   try {
-    const pilots = await Pilot.find({});
+    const pilots = await moPilotModel.find({});
+    // const pilots = await pgPilotModel.findAll({});
     console.log('Getting list of Pilots ...');
     res.status(200).json(pilots);
   }
@@ -19,15 +21,16 @@ async function getPilots (req, res, next) {
 
 async function getPilot (req, res, next) {
   try {
-    const {id} = req.params;
-    const pilot = await Pilot.findById(id);
+    const { id } = req.params;
+    const pilot = await moPilotModel.findById(id);
+    // const pilot = await pgPilotModel.findByPk(id);
     console.log('Pilot to be fetched:', id);
     if (!pilot) {
       res.status(404).json({message: `Cannot find pilot with ID, ${id}`});
     }
     else {
-    res.status(200).json(pilot);
-    console.log(`Pilot ${id} : ${pilot.name} found.`);
+      res.status(200).json(pilot);
+      console.log(`Pilot ${id} : ${pilot.name} found.`);
     }
   }
   catch (error) {
@@ -38,7 +41,8 @@ async function getPilot (req, res, next) {
 
 async function createPilot (req, res, next) {
   try {
-    const pilot = await Pilot.create(req.body);
+    const pilot = await moPilotModel.create(req.body);
+    // const pilot = await pgPilotModel.create(req.body);
     console.log('Pilot to be created:', req.body.name);
     res.status(200).json(pilot);
     console.log(`Pilot ${pilot.name} created.`);
@@ -51,15 +55,16 @@ async function createPilot (req, res, next) {
 
 async function updatePilot (req, res, next) {
   try {
-    const {id} = req.params;
-    const pilot = await Pilot.findByIdAndUpdate(id, req.body);
+    const { id } = req.params;
+    const pilot = await moPilotModel.findByIdAndUpdate(id, req.body);
+    // const pilot = await pgPilotModel.update(req.body, { where: { id: id }});
     console.log('Pilot to be updated:', req.body.name);
     if (!pilot) {
       res.status(404).json({message: `Cannot find pilot with ID, ${id}`});
     }
     else {
-    res.status(201).json(pilot);
-    console.log(`Pilot ${id} : ${pilot.name} updated.`);
+      res.status(201).json(pilot);
+      console.log(`Pilot ${id} : ${pilot.name} updated.`);
     }
   }
   catch (error) {
@@ -70,8 +75,9 @@ async function updatePilot (req, res, next) {
 
 async function deletePilot (req, res, next) {
   try {
-    const {id} = req.params;
-    let pilot = await Pilot.findByIdAndDelete(id, req.body);
+    const { id } = req.params;
+    const pilot = await Pilot.findByIdAndDelete(id, req.body);
+    // const pilot = await pgPilotModel.destroy({ where: { id: id }});
     console.log('Pilot to be deleted:', req.body.name);
     if (!pilot) {
       return res.status(404).json({message: `Cannot find pilot with ID, ${id}`});
@@ -79,7 +85,7 @@ async function deletePilot (req, res, next) {
     else {
       res.status(204).json(pilot);
       console.log(`Pilot ${id} : ${pilot.name} deleted.`);
-      }
+    }
   }
   catch (error) {
     dbErrorMessage(res, error);
