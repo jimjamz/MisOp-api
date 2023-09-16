@@ -3,14 +3,11 @@ const express = require('express');
 const router = express.Router;
 
 // db
-const mongoDB = require('./config/mongoDB');
+const mongoDB = require('./config/db/mongo');
 const mongoose = require('mongoose');
 
-const pg = require('pg');
-const postgres = require('./config/postgres');
-const pgClientClass = pg.Client;
+const postgres = require('./config/db/postgres');
 const pgUrl = postgres.url;
-const pgClient = new pgClientClass(pgUrl);
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize(pgUrl);
 
