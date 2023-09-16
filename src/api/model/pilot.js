@@ -1,13 +1,10 @@
 const mongoose = require('mongoose');
 
 // why do I have to create the connection string in each model for sequelize?
-const postgres = require('../../../config/postgres');
+const postgres = require('../../../config/db/postgres');
 const pgUrl = postgres.url;
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = new Sequelize(pgUrl);
-
-const dotenv = require('dotenv');
-dotenv.config();
 
 // mongoose model
 const pilotSchema = mongoose.Schema(
@@ -158,16 +155,6 @@ pgPilotModel.sync({ alter: true }).then((data) => {
 }).catch((error) => {
   console.log("An error occurred updating the Pilot table.");
 });
-
-// ###
-// alternative - to export only models for database of choice
-// ###
-// if (process.env.DB_CHOICE == "mongoose") {
-// const Pilot = mongoose.model('Pilot', pilotSchema);
-// }
-// else if (process.env.DB_CHOICE == "postgres") {
-//   const Pilot = pgPilotModel;
-// }
 
 module.exports = {
   moPilotModel,
