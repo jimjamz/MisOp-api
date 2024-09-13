@@ -1,6 +1,8 @@
 const express = require('express');
-const app = express();
 const router = express.Router(); 
+const db = require('../../../config/db/db');
+
+let databaseChoice = db.dbChoice;
 
 router
 .route('/')
@@ -10,7 +12,7 @@ router
 
 router.get('/status', (req, res) => {
   console.log('Getting application status ...');
-  res.status(200).send('Titan is up.');
+  res.status(200).send('Titan is up.  Database type is ' + databaseChoice + '.');
 });
 
 module.exports = router

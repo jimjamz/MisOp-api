@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { moPilotModel, pgPilotModel } = require('../model/pilot');
+const { sequelize } = require('../models/postgres');
+let pgPilot = sequelize.models.Pilot;
+const { moPilot } = require('../models/mongo/pilot');
 const { dbMongo, dbPostgres } = require('../../../config/db/db');
 
 let pilot, pilots = function(){};
@@ -9,13 +11,31 @@ async function getPilots (req, res, next) {
   try {
     // use only model for database of choice
     if (dbMongo) {
-      pilots = await moPilotModel.find({});
+      pilots = await moPilot.find({});
     }
     else if (dbPostgres) {
-      pilots = await pgPilotModel.findAll({});
+      pilots = await pgPilot.findAll({});
     }
     console.log('Getting list of Pilots ...');
     res.status(200).json(pilots);
+  }
+  catch (error) {
+    dbErrorMessage(res, error);
+  }
+  next();
+}
+
+async function deletePilots (req, res, next) {
+  try {
+    // use only model for database of choice
+    if (dbMongo) {
+      pilots = await moPilot.deleteMany({});
+    }
+    else if (dbPostgres) {
+      pilots = await pgPilot.destroyAll({});
+    }
+    console.log('Deleting all Pilots ...');
+    res.status(204).json(pilots);
   }
   catch (error) {
     dbErrorMessage(res, error);
@@ -27,14 +47,14 @@ async function getPilot (req, res, next) {
   try {
     const { id } = req.params;
     if (dbMongo) {
-      pilot = await moPilotModel.findById(id);
+      pilot = await moPilot.findById(id);
     }
     else if (dbPostgres) {
-      pilot = await pgPilotModel.findByPk(id);
+      pilot = await pgPilot.findByPk(id);
     }
     console.log('Pilot to be fetched:', id);
     if (!pilot) {
-      res.status(404).json({message: `Cannot find pilot with ID, ${id}`});
+      res.status(404).json({message: `Cannot find Pilot with ID, ${id}`});
     }
     else {
       res.status(200).json(pilot);
@@ -50,10 +70,10 @@ async function getPilot (req, res, next) {
 async function createPilot (req, res, next) {
   try {
     if (dbMongo) {
-      pilot = await moPilotModel.create(req.body);
+      pilot = await moPilot.create(req.body);
     }
     else if (dbPostgres) {
-      pilot = await pgPilotModel.create(req.body);
+      pilot = await pgPilot.create(req.body);
     }
     console.log('Pilot to be created:', req.body.name);
     res.status(200).json(pilot);
@@ -69,14 +89,14 @@ async function updatePilot (req, res, next) {
   try {
     const { id } = req.params;
     if (dbMongo) {
-      pilot = await moPilotModel.findByIdAndUpdate(id, req.body);
+      pilot = await moPilot.findByIdAndUpdate(id, req.body);
     }
     else if (dbPostgres) {
-      pilot = await pgPilotModel.update(req.body, { where: { id: id }});
+      pilot = await pgPilot.update(req.body, { where: { id: id }});
     }
     console.log('Pilot to be updated:', req.body.name);
     if (!pilot) {
-      res.status(404).json({message: `Cannot find pilot with ID, ${id}`});
+      res.status(404).json({message: `Cannot find Pilot with ID, ${id}`});
     }
     else {
       res.status(201).json(pilot);
@@ -93,14 +113,14 @@ async function deletePilot (req, res, next) {
   try {
     const { id } = req.params;
     if (dbMongo) {
-      pilot = await moPilotModel.findByIdAndDelete(id, req.body);
+      pilot = await moPilot.findByIdAndDelete(id, req.body);
     }
     else if (dbPostgres) {
-      pilot = await pgPilotModel.destroy({ where: { id: id }});
+      pilot = await pgPilot.destroy({ where: { id: id }});
     }
     console.log('Pilot to be deleted:', req.body.name);
     if (!pilot) {
-      res.status(404).json({message: `Cannot find pilot with ID, ${id}`});
+      res.status(404).json({message: `Cannot find Pilot with ID, ${id}`});
     }
     else {
       res.status(204).json(pilot);
@@ -118,6 +138,8 @@ router
 .get(getPilots, (req, res) => {
 })
 .post(createPilot, (req, res) => {
+})
+.delete(deletePilots, (req, res) => {
 })
 
 router

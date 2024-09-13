@@ -5,55 +5,75 @@ const router = express.Router;
 // db
 const mongoDB = require('./config/db/mongo');
 const mongoose = require('mongoose');
+const { sequelize } = require('./src/api/models/postgres');
+const pgStoreProc = require('./config/db/storeproc-postgres');
 
-const postgres = require('./config/db/postgres');
-const pgUrl = postgres.url;
-const Sequelize = require('sequelize');
-const sequelize = new Sequelize(pgUrl);
+// model tests
+/*
+let pgPilot = sequelize.models.Pilot;
+const { moPilot } = require('./src/api/models/mongo/pilot');
+let moPilots, pgPilots = function(){};
+*/
 
 // app
 const bodyParser = require('body-parser');
-
 const app = express();
 const port = 8080;
 
 // routes
-const indexRoute = require('./src/api/routes/index');
+const indexRoute = require('./src/api/routes');
+const craterRoute = require('./src/api/routes/crater');
 const pilotRoute = require('./src/api/routes/pilot');
 const titanRoute = require('./src/api/routes/titan');
-
 app.use(bodyParser.json({}));
 app.use('/', indexRoute);
+app.use('/crater', craterRoute);
 app.use('/pilot', pilotRoute);
 app.use('/titan', titanRoute);
 
-// connect MongoDB and run the app
-async function run() {
+async function main() {
   try {
+    // connect MongoDB
     await mongoose.connect(mongoDB.url)
     .then(() => {
       console.log('Connected to MongoDB.');
-      console.log(mongoDB.url);
-      console.log(mongoose.connection.readyState); // 1 is connected, 0 is disconnected.
+      console.log('Connection state: ', mongoose.connection.readyState); // 1 is connected, 0 is disconnected.
+    });
+    // connect Postgres
+    await sequelize.authenticate()
+    .then(() => {
+      console.log('Postgres connection via Sequelize has been established successfully.');
+      return true;
+    });
+    await sequelize.sync({force: true})
+    .then((data) => {
+      console.log("Syncing Postgres tables ...");
+    }).catch((error) => {
+      console.log("An error occurred updating the Postgres tables.");
+    })
+    .then(() => {
       app.listen(port, () => {
         console.log("Hello, Titan.  Live on port " + port);
       });
-    })
+    });
+  }
+  catch (error) {
+    console.error('Unable to connect to the database:', error);
+    return false;
   }
   finally {
     // Ensures that the client will close when you finish/error
-    await mongoose.connection.close;
-  }
+    // Don't do this for either - it immediately closes the connection manager
+    // await mongoose.connection.close();
+    // await sequelize.close();
+    pgStoreProc.pgCreateFactions();
+    pgStoreProc.pgCreateCraters();
+    pgStoreProc.pgCreateStartConfigs();
+    pgStoreProc.pgCreatePilots();
+  };
 }
-run().catch(console.dir);
+main().catch(console.dir);
 
-// connect Postgres
-async function connect() {
-  try {
-    await sequelize.authenticate();
-    console.log('Postgres connection via Sequelize has been established successfully.');
-  } catch (error) {
-    console.error('Sequelize is unable to connect to the Postgres database:', error);
-  }
+module.exports = {
+  app
 }
-connect();
