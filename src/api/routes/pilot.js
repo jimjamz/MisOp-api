@@ -118,7 +118,6 @@ async function deletePilot (req, res, next) {
     else if (dbPostgres) {
       pilot = await pgPilot.destroy({ where: { id: id }});
     }
-    console.log('Pilot to be deleted:', req.body.name);
     if (!pilot) {
       res.status(404).json({message: `Cannot find Pilot with ID, ${id}`});
     }

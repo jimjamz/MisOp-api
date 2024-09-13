@@ -3,7 +3,8 @@ const moBuildingSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Please enter a pilot name"]
+      required: [true, "Please enter a pilot name"],
+      unique: true
     },
     crater: {
       type: String,

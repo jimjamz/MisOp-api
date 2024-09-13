@@ -68,6 +68,7 @@ async function main() {
     // await sequelize.close();
     pgStoreProc.pgCreateFactions();
     pgStoreProc.pgCreateCraters();
+    pgStoreProc.pgCreateBuildings();
     pgStoreProc.pgCreateStartConfigs();
     pgStoreProc.pgCreatePilots();
   };

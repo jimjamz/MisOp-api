@@ -12,6 +12,7 @@ pgBuilding.init(
       type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true,
+      unique: true,
       validate: {
         notNull: { msg: 'Building must have a Name.' },
         notEmpty: { msg: 'Building Name must not be empty.' },

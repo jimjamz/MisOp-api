@@ -1,6 +1,7 @@
 const { sequelize } = require('../../src/api/models/postgres');
 const pgFaction = sequelize.models.Faction;
 const pgCrater = sequelize.models.Crater;
+const pgBuilding = sequelize.models.Building;
 const pgStartConfig = sequelize.models.StartConfiguration;
 const pgPilot = sequelize.models.Pilot;
 
@@ -39,6 +40,25 @@ let pgCreateCraters = async function () {
     console.log('Craters created in Postgres: ', cratersCreated);
 };
 
+let pgCreateBuildings = async function () {
+    console.log("Creating Postgres Building stored procedures ...")
+    await pgBuilding.sync({ alter: true });
+    await pgBuilding.bulkCreate([
+        {"name": "God Hangar", "crater": "Downtown", "faction": "Flyers"},
+        {"name": "Alpha Trading Post", "crater": "Alpha", "faction": "Flyers"},
+        {"name": "Hardwarp FM", "crater": "Downtown", "faction": "Flyers"},
+        {"name": "Gamma Monorail Depot", "crater": "Gamma", "faction": "Flyers", "monorailTerminal": true},
+        {"name": "Conurbation 2", "crater": "Downtown", "faction": "Flyers"},
+        {"name": "Empty Hangar A3", "crater": "Alpha", "faction": "EstateAgents"},
+        {"name": "Empty Hangar A5", "crater": "Alpha", "faction": "EstateAgents"}, //Zero Cool's Hangar
+        {"name": "Vacant 0001", "crater": "Downtown", "faction": "EstateAgents"}, // Acid Burn's Hangar
+        {"name": "Vacant R1", "crater": "Riverside", "faction": "EstateAgents"}, // Lord Nicon's Hangar
+        {"name": "Pirate's Nest", "crater": "Highrise", "faction": "EstateAgents"}, // Jade Falcon's Hangar
+        {"name": "Empty Hangar A6", "crater": "Alpha", "faction": "EstateAgents"}], // Coolon Dibsey's Hangar
+        {validate: true}
+    );
+};
+
 let pgCreateStartConfigs = async function () {
     console.log("Creating Postgres Start Configuration stored procedures ...");
     await pgStartConfig.sync({ alter: true });
@@ -57,11 +77,10 @@ let pgCreatePilots = async function () {
         {"name": "Zero Cool", "status": "Flying around location.name", "location": ["Alpha", "Zero Cool's Hangar"]},
         {"name": "Acid Burn", "location": ["Downtown", "Acid Burn's Hangar"]},
         {"name": "Lord Nicon", "status": "Flying around location.name", "location": ["Riverside", "Lord Nicon's Hangar"]},
-        {"name": "Crackatoa", "location": ["Alpha", "Crackatoa's Hangar"]},
-        {"name": "Forager", "location": ["Alpha", "Forager's Hangar"]},
-        {"name": "Jade Falcon", "status": "Charging their moth at location.name", "location": ["Highrise", "Jade Falcon's Hangar"]},
+        {"name": "Jade Falcon", "status": "Charging their moth at location.name", "location": ["Highrise", "Jade Falcon's Hangar"], "faction": "Pirates"},
         {"name": "Coolon Dibsey", "status": "Fighting with pilot.name", "location": ["Alpha", "Coolon Dibsey's Hangar"], "faction": "Pirates", "relationship_police": -1}],
         {validate: true}
+        // assign pilot ownership to hangars once relationships are created
     );
 };
 
@@ -76,6 +95,7 @@ let pgTearDownTitan = async function () {
 module.exports = {
     pgCreateFactions,
     pgCreateCraters,
+    pgCreateBuildings,
     pgCreateStartConfigs,
     pgCreatePilots,
     pgTearDownTitan
