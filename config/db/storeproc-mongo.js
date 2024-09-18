@@ -1,14 +1,12 @@
-const { sequelize } = require('../../src/api/models/postgres');
-const pgFaction = sequelize.models.Faction;
-const pgCrater = sequelize.models.Crater;
-const pgBuilding = sequelize.models.Building;
-const pgStartConfig = sequelize.models.StartConfiguration;
-const pgPilot = sequelize.models.Pilot;
+const { moFaction } = require('../../src/api/models/mongo/faction');
+const { moCrater } = require('../../src/api/models/mongo/crater');
+const { moBuilding } = require('../../src/api/models/mongo/building');
+const { moStartConfig } = require('../../src/api/models/mongo/startConfiguration');
+const { moPilot } = require('../../src/api/models/mongo/pilot');
 
-let pgCreateFactions = async function () {
-    console.log("Creating Postgres Faction stored procedures ...");
-    await pgFaction.sync({ alter: true });
-    await pgFaction.bulkCreate([
+let moCreateFactions = async function () {
+    console.log("Creating MongoDB Faction stored procedures ...");
+    await moFaction.insertMany([
         {"name": "EstateAgents", "friend": "Flyers"},
         {"name": "Flyers", "friend": "Flyers"},
         {"name": "Klamp-G", "friend": "Scrubbers", "enemy": "Lazarus"},
@@ -18,19 +16,16 @@ let pgCreateFactions = async function () {
         {"name": "Scrubbers", "friend": "Klamp-G", "enemy": "Skinners"},
         {"name": "Skinners", "friend": "Lazarus", "enemy": "Scrubbers"}],
         {validate: true}
-    )
-    .then(() => {
-        pgFaction.findAndCountAll({})
-        .then((result) => {
-            console.log('\nFactions created in Postgres: ', result.count);
-        });
+    );
+    moFaction.countDocuments({})
+    .then((result) => {
+        console.log('Factions created in Mongo: ', result);
     });
 };
 
-let pgCreateCraters = async function () {
-    console.log("Creating Postgres Crater stored procedures ...")
-    await pgCrater.sync({ alter: true });
-    await pgCrater.bulkCreate([
+let moCreateCraters = async function () {
+    console.log("Creating MongoDB Crater stored procedures ...")
+    await moCrater.insertMany([
         {"name": "Alpha", "faction": "Lazarus", "connectingCraters": ["Downtown", "Haven"], "hasMonorail": true},
         {"name": "Downtown", "faction": "Pirates", "connectingCraters": ["Alpha", "Gamma", "Highrise", "Port"], "hasMonorail": true},
         {"name": "Gamma", "faction": "Klamp-G", "connectingCraters": ["Downtown", "Midway", "Riverside"], "hasMonorail": false},
@@ -41,19 +36,16 @@ let pgCreateCraters = async function () {
         {"name": "Reservoir", "faction": "Klamp-G", "connectingCraters": ["Highrise", "Riverside"], "hasMonorail": false},
         {"name": "Riverside", "faction": "Klamp-G", "connectingCraters": ["Gamma", "Reservoir"], "hasMonorail": false}],
         {validate: true}
-    )
-    .then(() => {
-        pgCrater.findAndCountAll({})
-        .then((result) => {
-            console.log('\nCraters created in Postgres: ', result.count);
-        });
+    );
+    moCrater.countDocuments({})
+    .then((result) => {
+        console.log('Craters created in Mongo: ', result);
     });
-};
+    };
 
-let pgCreateBuildings = async function () {
-    console.log("Creating Postgres Building stored procedures ...")
-    await pgBuilding.sync({ alter: true });
-    await pgBuilding.bulkCreate([
+let moCreateBuildings = async function () {
+    console.log("Creating MongoDB Building stored procedures ...")
+    await moBuilding.insertMany([
         {"name": "God Hangar", "crater": "Downtown", "faction": "Flyers"},
         {"name": "Alpha Trading Post", "crater": "Alpha", "faction": "Flyers"},
         {"name": "Hardwarp FM", "crater": "Downtown", "faction": "Flyers"},
@@ -66,36 +58,30 @@ let pgCreateBuildings = async function () {
         {"name": "Pirate's Nest", "crater": "Highrise", "faction": "EstateAgents"}, // Jade Falcon's Hangar
         {"name": "Empty Hangar A6", "crater": "Alpha", "faction": "EstateAgents"}], // Coolon Dibsey's Hangar
         {validate: true}
-    )
-    .then(() => {
-        pgBuilding.findAndCountAll({})
-        .then((result) => {
-            console.log('\nBuildings created in Postgres: ', result.count);
-        });
+    );
+    moBuilding.countDocuments({})
+    .then((result) => {
+        console.log('Buildings created in Mongo: ', result);
     });
 };
 
-let pgCreateStartConfigs = async function () {
-    console.log("Creating Postgres Start Configuration stored procedures ...");
-    await pgStartConfig.sync({ alter: true });
-    await pgStartConfig.bulkCreate([
+let moCreateStartConfigs = async function () {
+    console.log("Creating MongoDB Start Configuration stored procedures ...");
+    await moStartConfig.insertMany([
         {"role": "Trader", "description": "Start in the Alpha district equipped for trading.", "location": ["Alpha", "Alpha Trading Post"]},
         {"role": "Scavenger", "description": "Start in the Downtown area equipped for scavenging.", "location": ["Downtown", "Conurbation 2"]},
         {"role": "Aggressor", "description": "Start in the troubled Reservoir zone equipped for combat.", "location": ["Gamma", "Gamma Monorail Depot"]}],
         {validate: true}
-    )
-    .then(() => {
-        pgStartConfig.findAndCountAll({})
-        .then((result) => {
-            console.log('\nStart Configurations created in Postgres: ', result.count);
-        });
+    );
+    moStartConfig.countDocuments({})
+    .then((result) => {
+        console.log('Start Configurations created in Mongo: ', result);
     });
 };
 
-let pgCreatePilots = async function () {
-    console.log("Creating Postgres Pilot stored procedures ...");
-    await pgPilot.sync({ alter: true });
-    await pgPilot.bulkCreate([
+let moCreatePilots = async function () {
+    console.log("Creating MongoDB Pilot stored procedures ...");
+    await moPilot.insertMany([
         {"name": "Zero Cool", "status": "Flying around location.name", "location": ["Alpha", "Zero Cool's Hangar"]},
         {"name": "Acid Burn", "location": ["Downtown", "Acid Burn's Hangar"]},
         {"name": "Lord Nicon", "status": "Flying around location.name", "location": ["Riverside", "Lord Nicon's Hangar"]},
@@ -103,30 +89,28 @@ let pgCreatePilots = async function () {
         {"name": "Coolon Dibsey", "status": "Fighting with pilot.name", "location": ["Alpha", "Coolon Dibsey's Hangar"], "faction": "Pirates", "relationship_police": -1}],
         {validate: true}
         // assign pilot ownership to hangars once relationships are created
-    )
-    .then(() => {
-        pgPilot.findAndCountAll({})
-        .then((result) => {
-            console.log('\nPilots created in Postgres: ', result.count);
-        });
+    );
+    moPilot.countDocuments({})
+    .then((result) => {
+        console.log('Pilots created in Mongo: ', result);
     });
 };
 
-let pgTearDownTitan = async function () {
+let moTearDownTitan = async function () {
     console.log("Tearing down Titan ...");
-    await pgPilot.destroy({truncate: true});
-    await pgStartConfig.destroy({truncate: true});
-    await pgBuilding.destroy({truncate: true});
-    await pgCrater.destroy({truncate: true});
-    await pgFaction.destroy({truncate: true});
+    await moPilot.deleteMany({});
+    await moStartConfig.deleteMany({});
+    await moBuilding.deleteMany({});
+    await moCrater.deleteMany({});
+    await moFaction.deleteMany({});
     
 };
 
 module.exports = {
-    pgCreateFactions,
-    pgCreateCraters,
-    pgCreateBuildings,
-    pgCreateStartConfigs,
-    pgCreatePilots,
-    pgTearDownTitan
+    moCreateFactions,
+    moCreateCraters,
+    moCreateBuildings,
+    moCreateStartConfigs,
+    moCreatePilots,
+    moTearDownTitan
   };

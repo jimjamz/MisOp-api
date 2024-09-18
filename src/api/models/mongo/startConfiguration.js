@@ -35,7 +35,7 @@ const moStartConfigSchema = mongoose.Schema(
     timestamps: true
   }
 );
-const moStartConfig = mongoose.model('Crater', moStartConfigSchema);
+const moStartConfig = mongoose.model('StartConfiguration', moStartConfigSchema);
 
 module.exports = {
   moStartConfig

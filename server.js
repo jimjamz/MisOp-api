@@ -1,13 +1,13 @@
 // express
 const express = require('express');
-const router = express.Router;
 
 // db
+const { dbMongo, dbPostgres } = require('./config/db/db');
 const mongoDB = require('./config/db/mongo');
 const mongoose = require('mongoose');
 const { sequelize } = require('./src/api/models/postgres');
 const pgStoreProc = require('./config/db/storeproc-postgres');
-
+const moStoreProc = require('./config/db/storeproc-mongo');
 // model tests
 /*
 let pgPilot = sequelize.models.Pilot;
@@ -45,7 +45,7 @@ async function main() {
       console.log('Postgres connection via Sequelize has been established successfully.');
       return true;
     });
-    await sequelize.sync({force: true})
+    await sequelize.sync({alter: true})
     .then((data) => {
       console.log("Syncing Postgres tables ...");
     }).catch((error) => {
@@ -66,11 +66,27 @@ async function main() {
     // Don't do this for either - it immediately closes the connection manager
     // await mongoose.connection.close();
     // await sequelize.close();
-    pgStoreProc.pgCreateFactions();
-    pgStoreProc.pgCreateCraters();
-    pgStoreProc.pgCreateBuildings();
-    pgStoreProc.pgCreateStartConfigs();
-    pgStoreProc.pgCreatePilots();
+
+    if (dbMongo) {
+      moStoreProc.moTearDownTitan()
+      .then(() => {
+        moStoreProc.moCreateFactions();
+        moStoreProc.moCreateCraters();
+        moStoreProc.moCreateBuildings();
+        moStoreProc.moCreateStartConfigs();
+        moStoreProc.moCreatePilots();
+      });
+    }
+    else if (dbPostgres) {
+      pgStoreProc.pgTearDownTitan()
+      .then(() => {
+        pgStoreProc.pgCreateFactions();
+        pgStoreProc.pgCreateCraters();
+        pgStoreProc.pgCreateBuildings();
+        pgStoreProc.pgCreateStartConfigs();
+        pgStoreProc.pgCreatePilots();
+      });
+    }
   };
 }
 main().catch(console.dir);
